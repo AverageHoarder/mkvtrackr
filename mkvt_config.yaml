@@ -1,0 +1,57 @@
+# Default language codes used when filtering the track selection via "p" and then selecting "d"
+default_filter_langs:
+  audio:
+    - ja
+    - jpn
+    - de
+    - deu
+    - de-DE
+    - ger
+    - en
+    - eng
+    - en-GB
+    - en-CA
+    - en-US
+  sub:
+    - de
+    - deu
+    - de-DE
+    - ger
+    - en
+    - eng
+    - en-GB
+    - en-CA
+    - en-US
+
+# Directories that will not be scanned for .mkv files (case insensitive)
+ignore_dirs:
+  - behind the scenes
+  - deleted scenes
+  - interviews
+  - scenes
+  - samples
+  - shorts
+  - featurettes
+  - clips
+  - other
+  - extras
+  - trailers
+
+# Subformat codes to display in the program
+sub_codec_replacements:
+  "SubStationAlpha": "ASS"
+  "SubRip/SRT": "SRT"
+  "HDMV PGS": "PGS"
+  "VobSub": "VOB"
+
+# Regex to match unwanted .mkv files like trailers, samples..
+pattern_unwanted: '^.*-trailer.mkv$|^.*-sample.mkv$'
+
+# Remove all attachments (embedded fonts, covers, nfos...) during remuxing, Default: False, can also be enabled via --remove_attachments
+remove_attachments: False
+
+# Trim other tracks to the video length, Default: False, can also be enabled via --stop_after_video_ends
+stop_after_video_ends: False
+
+# After remuxing, use mkvpropr on the same directory to set file title, track names, languages and flags, Default: True
+run_mkvp: True
