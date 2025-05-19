@@ -410,7 +410,7 @@ def print_track_info(track_info, filter_active=False, filter_langs=default_filte
         print(f'{" "*17}CUSTOM FILTER ACTIVE, ENTER "t" TO TURN IT OFF or "p" TO EDIT IT!')
 
 # Get the audio, subtitle and default-track info from the user
-def getInput(mkv_files, movies_in_cat, category_count, filter_active=False, filter_langs={}):
+def getInput(mkv_files, movies_in_cat, category_count, filter_active=False, filter_langs={}, last_input=""):
     # Validate inputs and requery in case of mistakes
     testmovie = movies_in_cat[0]
     track_info = mkv_files[testmovie]
@@ -427,18 +427,19 @@ def getInput(mkv_files, movies_in_cat, category_count, filter_active=False, filt
         print(h_bar)
         print_track_info(track_info=track_info, filter_active=filter_active, filter_langs=filter_langs)
         print(h_bar)
+        print('Audio and subtitle track order example: 2 1 4 3 5' if not last_input else f'Last input: {last_input}. Use "i" to reuse it')
         if filter_active:
-            print(f'Audio and video track order example: 2 1 4 3 5\n"s" skip, "p" edit filter, "t" deactivate filter, "n" apply selection "f" filenames, "ff" filepaths')
+            print(f'"s" skip, "p" edit filter, "t" deactivate filter, "n" apply selection "f" filenames, "ff" filepaths')
         elif filter_langs != dict(default_filter_langs):
-            print(f'Audio and video track order example: 2 1 4 3 5\n"s" skip group, "p" filter by language, "t" activate custom filter, "f" filenames, "ff" filepaths')
+            print(f'"s" skip group, "p" filter by language, "t" activate custom filter, "f" filenames, "ff" filepaths')
         else:
-            print(f'Audio and video track order example: 2 1 4 3 5\n"s" skip group, "p" filter by language, "t" activate default filter, "f" filenames, "ff" filepaths')
+            print(f'"s" skip group, "p" filter by language, "t" activate default filter, "f" filenames, "ff" filepaths')
         print(h_bar)
         user_input = input(f"Group {category_count + 1} contains {group_filecount} " + ("files." if group_filecount > 1 else "file.") + " \nCodes please:\n")
 
         # Skip the current group
         if user_input == "s":
-            return user_input, filter_active
+            return user_input, filter_active, last_input
         # Filter the displayed tracks via language codes
         elif user_input == "p":
             while True:
@@ -476,7 +477,7 @@ Codes please:\n""")
                               "video_ids": video_ids,
                               "audio_ids": [str(tid) for tid in filtered_inputs if tid in audio_ids],
                               "subtitle_ids": [str(tid) for tid in filtered_inputs if tid in subtitle_ids]}
-            return inputs_and_ids, filter_active
+            return inputs_and_ids, filter_active, last_input
         # List the filenames of all files in the current group
         elif user_input == "f":
             print(h_bar)
@@ -495,6 +496,9 @@ Codes please:\n""")
             print(h_bar)
             input("Press Enter to continue...")
             continue
+        # Set the user input to the last input
+        elif user_input == "i":
+            user_input = last_input
         match_order = re.match(pattern_input, user_input)
         if not match_order:
             print("Invalid code(s) or syntax, try again.")
@@ -514,7 +518,8 @@ Codes please:\n""")
                               "video_ids": video_ids,
                               "audio_ids": [str(tid) for tid in inputs_int if tid in audio_ids],
                               "subtitle_ids": [str(tid) for tid in inputs_int if tid in subtitle_ids]}
-            return inputs_and_ids, filter_active
+            last_input = user_input
+            return inputs_and_ids, filter_active, last_input
         else:
             print("Invalid track ids, try again.")
             sleep(1)
@@ -620,14 +625,16 @@ def main(args):
 
     with tqdm(total = len(categories), position=0, desc="Collecting category inputs", unit="cat", ncols=100) as pbar:
         category_count = 0
+        last_input = ""
         for cat in categories:
             movies_in_cat = [movie for movie in category_dict[cat]]
             # Query user for track ids for reordering
-            inputs_and_ids, filter_active = getInput(mkv_files=mkv_files, 
+            inputs_and_ids, filter_active, last_input = getInput(mkv_files=mkv_files, 
                                                  movies_in_cat=movies_in_cat,
                                                  category_count=category_count,
                                                  filter_active=filter_active,
-                                                 filter_langs=filter_langs)
+                                                 filter_langs=filter_langs,
+                                                 last_input=last_input)
             if inputs_and_ids == "s":
                 print("Skipping current category.")
                 pbar.update(1)
